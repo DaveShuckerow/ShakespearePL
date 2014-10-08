@@ -46,7 +46,7 @@ sister	1
 sky	1
 son	1
 squirrel	1
-stone wall	1
+stone-wall	1
 thing	1
 town	1
 tree	1
@@ -77,5 +77,5 @@ starvation	-1
 toad	-1
 war	-1
 wolf	-1
-nothing	-2
-zero	-2
+nothing	0
+zero	0
