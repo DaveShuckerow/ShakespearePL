@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"os"
-	"strings"
-	"strconv"
+	"fmt"
 	"math"
+	"os"
+	"strconv"
+	"strings"
 )
 
 var verbose bool
@@ -17,33 +17,33 @@ var enter, exit, exeunt, closebrace string = "[Enter", "[Exit", "[Exeunt", "]"
 var outputs, inputs, parameters map[string]int
 var gotos, conditions, pushes, pops map[string]int
 var NOUNS, ADJECTIVES, PERSON_NOUNS, PERSON_ADJECTIVES map[string]int
-var operations map[string](func([]int)int)
+var operations map[string](func([]int) int)
 
 func LoadKeywords() {
 	outputs = LoadMapFromFile("keywords/outputs.kws")
 	inputs = LoadMapFromFile("keywords/inputs.kws")
 	parameters = LoadMapFromFile("keywords/operations.kws")
-	operations = map[string](func([]int)int) {
-		"sum": Sum,
+	operations = map[string](func([]int) int){
+		"sum":        Sum,
 		"difference": Difference,
-		"product": Product,
-		"division":	Quotient,
-		"quotient":	Quotient,
-		"square": Square,
-		"cube": Cube,
-		"root": SquareRoot,
-		"twice": Double,
+		"product":    Product,
+		"division":   Quotient,
+		"quotient":   Quotient,
+		"square":     Square,
+		"cube":       Cube,
+		"root":       SquareRoot,
+		"twice":      Double,
 	}
-	gotos = map[string]int {
+	gotos = map[string]int{
 		"Let": 1,
 	}
-	conditions = map[string]int {
+	conditions = map[string]int{
 		"If": 1,
 	}
-	pushes = map[string]int {
+	pushes = map[string]int{
 		"Remember": 1,
 	}
-	pops = map[string]int {
+	pops = map[string]int{
 		"Recall": 1,
 	}
 	NOUNS = LoadMapFromFile("keywords/nouns.kws")
@@ -54,7 +54,7 @@ func LoadKeywords() {
 }
 
 func LoadMapFromFile(filename string) (mapping map[string]int) {
-	mapping = map[string]int {}
+	mapping = map[string]int{}
 	file, _ := os.Open(filename)
 	reader := bufio.NewScanner(file)
 	reader.Split(bufio.ScanWords)
@@ -87,20 +87,21 @@ func ParseTo(words []string, delim string) (toPeriod string, newWords []string) 
 
 // Program is composed of Title, DramatisPersonae, and 1 or more Acts
 type Program struct {
-	Description string
-	Output string
+	Description      string
+	Output           string
 	DramatisPersonae map[string]*Character
-	Acts []*Act
+	Acts             []*Act
 }
+
 func (p *Program) Parse(words []string) (msg string, newWords []string) {
 	p.Description, words = ParseTo(words, punctuation)
-	p.DramatisPersonae = map[string]*Character {}
-	if (verbose) {
+	p.DramatisPersonae = map[string]*Character{}
+	if verbose {
 		fmt.Println(p.Description)
 	}
 	for words[0] != "Act" {
-		if (verbose) {
-			fmt.Println("Character:",words[0])
+		if verbose {
+			fmt.Println("Character:", words[0])
 		}
 		c := new(Character)
 		_, words = c.Parse(words)
@@ -113,8 +114,8 @@ func (p *Program) Parse(words []string) (msg string, newWords []string) {
 	msg, newWords = "", words
 	return
 }
-func(p *Program) Eval(environ map[string]int) map[string]int {
-	if (verbose) {
+func (p *Program) Eval(environ map[string]int) map[string]int {
+	if verbose {
 		fmt.Println("Evaluating", p.Description)
 	}
 	environ["Act"] = 1
@@ -135,11 +136,12 @@ func(p *Program) Eval(environ map[string]int) map[string]int {
 }
 
 type Character struct {
-	Name string
+	Name        string
 	Description string
-	Stack []int
-	OnStage bool
+	Stack       []int
+	OnStage     bool
 }
+
 func (c *Character) Parse(words []string) (msg string, newWords []string) {
 	c.Name, words = ParseTo(words, comma)
 	c.Name = c.Name[:len(c.Name)-1]
@@ -148,20 +150,21 @@ func (c *Character) Parse(words []string) (msg string, newWords []string) {
 	newWords = words
 	return
 }
-func (c *Character) Eval(environ map[string]int) map[string]int {return environ}
+func (c *Character) Eval(environ map[string]int) map[string]int { return environ }
 func (c *Character) Value() int {
 	return c.Stack[len(c.Stack)-1]
 }
 
 type Act struct {
-	Number *Roman
+	Number      *Roman
 	Description string
-	Scenes []*Scene
+	Scenes      []*Scene
 }
+
 func (a *Act) Parse(words []string) (msg string, newWords []string) {
 	a.Number = new(Roman)
 	_, words = a.Number.Parse(words)
-	if (verbose) {
+	if verbose {
 		fmt.Println("Parsing Act", a.Number.Content)
 	}
 	a.Description, words = ParseTo(words[1:], punctuation)
@@ -173,8 +176,8 @@ func (a *Act) Parse(words []string) (msg string, newWords []string) {
 	newWords = words
 	return
 }
-func (a *Act) Eval(environ map[string]int) map[string]int{
-	if (verbose) {
+func (a *Act) Eval(environ map[string]int) map[string]int {
+	if verbose {
 		fmt.Println("Evaluating Act", a.Number.Content+":", a.Description)
 	}
 	environ["Scene"] = 1
@@ -187,14 +190,15 @@ func (a *Act) Eval(environ map[string]int) map[string]int{
 }
 
 type Scene struct {
-	Number *Roman
+	Number      *Roman
 	Description string
-	Lines []*Line
+	Lines       []*Line
 }
+
 func (s *Scene) Parse(words []string) (msg string, newWords []string) {
 	s.Number = new(Roman)
 	_, words = s.Number.Parse(words)
-	if (verbose) {
+	if verbose {
 		fmt.Println("Parsing Scene", s.Number.Content)
 	}
 	s.Description, words = ParseTo(words, punctuation)
@@ -203,15 +207,15 @@ func (s *Scene) Parse(words []string) (msg string, newWords []string) {
 		_, words = s.Lines[len(s.Lines)-1].Parse(words)
 	}
 	msg, newWords = "", words
-	return 
+	return
 }
 func (s *Scene) Eval(environ map[string]int) map[string]int {
-	if (verbose) {
+	if verbose {
 		fmt.Println("Evaluating Scene", s.Number.Content+":", s.Description)
 	}
 	act, scene := environ["Act"], environ["Scene"]
 	line := 0
-	for environ["Act"] == act && environ["Scene"] == scene && environ["Goto"] == 0 && line < len(s.Lines){
+	for environ["Act"] == act && environ["Scene"] == scene && environ["Goto"] == 0 && line < len(s.Lines) {
 		environ = s.Lines[line].Eval(environ)
 		line++
 	}
@@ -219,13 +223,14 @@ func (s *Scene) Eval(environ map[string]int) map[string]int {
 }
 
 type Line struct {
-	Name string
+	Name      string
 	Sentences []Interpreter
 }
+
 func (l *Line) Parse(words []string) (msg string, newWords []string) {
 	var end int
 	msg = ""
-	l.Name = strings.Trim(words[0],colon)
+	l.Name = strings.Trim(words[0], colon)
 	switch words[0] {
 	case enter:
 		fallthrough
@@ -233,20 +238,20 @@ func (l *Line) Parse(words []string) (msg string, newWords []string) {
 		fallthrough
 	case exeunt:
 		s := new(Sentence)
-		for end=0; words[end] != closebrace; end++ {
+		for end = 0; words[end] != closebrace; end++ {
 			if words[end] != and {
 				s.Words = append(s.Words, words[end])
 			}
 		}
 		end++
 		l.Sentences = append(l.Sentences, s)
-		if (verbose) {
+		if verbose {
 			fmt.Printf("%s\n", strings.Join(words[:end-1], " ")+words[end-1])
 		}
 		words = words[end:]
 	default:
-		if (verbose) {
-			fmt.Println("Parsing line: "+words[0])
+		if verbose {
+			fmt.Println("Parsing line: " + words[0])
 		}
 		words, end = words[2:], 0
 		for (words[1] != colon && words[0][0] != '[') && 1 < len(words) {
@@ -257,11 +262,11 @@ func (l *Line) Parse(words []string) (msg string, newWords []string) {
 				temp := new(Assignment)
 				temp.Name = l.Name
 				s = temp
-			} else if inputs[w0] == inputs[w2] && inputs[w0] != 0{
+			} else if inputs[w0] == inputs[w2] && inputs[w0] != 0 {
 				temp := new(Input)
 				temp.Name = l.Name
 				s = temp
-			} else if outputs[w0] == outputs[w2] && outputs[w0] != 0{
+			} else if outputs[w0] == outputs[w2] && outputs[w0] != 0 {
 				temp := new(Output)
 				temp.Name = l.Name
 				s = temp
@@ -296,11 +301,11 @@ func (l *Line) Parse(words []string) (msg string, newWords []string) {
 					s = q
 				}
 			}
-			
+
 			l.Sentences = append(l.Sentences, s)
 			end = 0
-			if (verbose) {
-				switch t:=s.(type) {
+			if verbose {
+				switch t := s.(type) {
 				default:
 					fmt.Printf("%T: %s\n", t, w)
 				}
@@ -327,12 +332,12 @@ func (l *Line) Eval(environ map[string]int) map[string]int {
 				count++
 				if l.Name == enter {
 					character.OnStage = true
-					if (verbose) {
+					if verbose {
 						fmt.Println(word, "enters the stage")
 					}
 				} else {
 					character.OnStage = false
-					if (verbose) {
+					if verbose {
 						fmt.Println(word, "exits the stage")
 					}
 				}
@@ -358,24 +363,27 @@ func (l *Line) Eval(environ map[string]int) map[string]int {
 }
 
 type Sentence struct {
-	Name string
-	Words []string
+	Name       string
+	Words      []string
 	Terminator string
 }
+
 func (s *Sentence) Parse(words []string) (msg string, newWords []string) {
 	var end int
-	for end=0; !strings.Contains(punctuation, words[end]); end++ {}
+	for end = 0; !strings.Contains(punctuation, words[end]); end++ {
+	}
 	s.Words = words[:end]
 	s.Terminator = words[end]
 	newWords = words[end+1:]
-	msg = strings.Join(s.Words, " ")+s.Terminator
+	msg = strings.Join(s.Words, " ") + s.Terminator
 	return
 }
-func (s *Sentence) Eval(environ map[string]int) map[string]int {return environ}
+func (s *Sentence) Eval(environ map[string]int) map[string]int { return environ }
 
 type Assignment struct {
 	Sentence
 }
+
 func (a *Assignment) Eval(environ map[string]int) map[string]int {
 	var target *Character
 	for name, c := range program.DramatisPersonae {
@@ -384,11 +392,11 @@ func (a *Assignment) Eval(environ map[string]int) map[string]int {
 		}
 	}
 	start := 0
-	if (verbose) {
-		fmt.Print("Evaluating ",strings.Join(a.Words, " "), "...")
+	if verbose {
+		fmt.Print("Evaluating ", strings.Join(a.Words, " "), "...")
 	}
 	value := ParseMath(a.Words, &start, target.Stack[len(target.Stack)-1])
-	if (verbose) {
+	if verbose {
 		fmt.Println(value)
 	}
 
@@ -399,6 +407,7 @@ func (a *Assignment) Eval(environ map[string]int) map[string]int {
 type Output struct {
 	Sentence
 }
+
 func (o *Output) Eval(environ map[string]int) map[string]int {
 	var target *Character
 	for name, c := range program.DramatisPersonae {
@@ -408,12 +417,12 @@ func (o *Output) Eval(environ map[string]int) map[string]int {
 	}
 	value := target.Stack[len(target.Stack)-1]
 	if outputs[strings.ToLower(o.Words[0])] == 1 {
-		if (verbose) {
+		if verbose {
 			fmt.Println(target.Name+"(asString):", string(byte(value)))
 		}
 		program.Output += string(byte(value))
 	} else {
-		if (verbose) {
+		if verbose {
 			fmt.Println(target.Name+":", value)
 		}
 		program.Output += string(value)
@@ -424,40 +433,47 @@ func (o *Output) Eval(environ map[string]int) map[string]int {
 type Input struct {
 	Sentence
 }
-func (i *Input) Eval(environ map[string]int) map[string]int {return environ}
+
+func (i *Input) Eval(environ map[string]int) map[string]int { return environ }
 
 type Goto struct {
 	Sentence
-	ToAct bool
+	ToAct  bool
 	Number Roman
 }
-func (g *Goto) Eval(environ map[string]int) map[string]int {return environ}
+
+func (g *Goto) Eval(environ map[string]int) map[string]int { return environ }
 
 type Query struct {
 	Sentence
 }
-func (q *Query) Eval(environ map[string]int) map[string]int {return environ}
+
+func (q *Query) Eval(environ map[string]int) map[string]int { return environ }
 
 type Conditional struct {
 	Sentence
 	Question Query
 }
-func (c *Conditional) Eval(environ map[string]int) map[string]int {return environ}
+
+func (c *Conditional) Eval(environ map[string]int) map[string]int { return environ }
 
 type Push struct {
 	Sentence
 }
-func (p *Push) Eval(environ map[string]int) map[string]int {return environ}
+
+func (p *Push) Eval(environ map[string]int) map[string]int { return environ }
 
 type Pop struct {
 	Sentence
 }
-func (p *Pop) Eval(environ map[string]int) map[string]int {return environ}
+
+func (p *Pop) Eval(environ map[string]int) map[string]int { return environ }
 
 type Roman struct {
 	Content string
-	Value int
+	Value   int
 }
+
 func (r *Roman) Parse(words []string) (msg string, newWords []string) {
 	r.Content = words[1]
 	switch r.Content {
@@ -470,7 +486,7 @@ func (r *Roman) Parse(words []string) (msg string, newWords []string) {
 	case "IV":
 		r.Value = 4
 	case "V":
-		r.Value = 5		
+		r.Value = 5
 	case "VI":
 		r.Value = 6
 	case "VII":
@@ -486,12 +502,12 @@ func (r *Roman) Parse(words []string) (msg string, newWords []string) {
 	msg = r.Content + ": " + strconv.Itoa(r.Value)
 	return
 }
-func (r *Roman) Eval(environ map[string]int) map[string]int {return environ}
+func (r *Roman) Eval(environ map[string]int) map[string]int { return environ }
 
-func ParseMath(words []string, start *int, startVal int) int{
+func ParseMath(words []string, start *int, startVal int) int {
 	// Parse the array for values and math.
 	value := 1
-	for ; *start<len(words); *start++ {
+	for ; *start < len(words); *start++ {
 		i := *start
 		word := words[i]
 		w := strings.ToLower(word)
@@ -514,10 +530,11 @@ func ParseMath(words []string, start *int, startVal int) int{
 			w2 = strings.ToLower(words[i+1])
 		}
 		if val, ok := parameters[w]; ok {
-			if _, ok2 := parameters[w2]; ok2 {} else {
+			if _, ok2 := parameters[w2]; ok2 {
+			} else {
 				*start++
 				var params []int
-				for i:=val; i>0; i-- {
+				for i := val; i > 0; i-- {
 					params = append(params, ParseMath(words, start, startVal))
 				}
 				return operations[w](params)
@@ -528,19 +545,19 @@ func ParseMath(words []string, start *int, startVal int) int{
 }
 
 func Sum(x []int) int {
-	return x[0]+x[1]
+	return x[0] + x[1]
 }
 
 func Difference(x []int) int {
-	return x[0]-x[1]
+	return x[0] - x[1]
 }
 
 func Product(x []int) int {
-	return x[0]*x[1]
+	return x[0] * x[1]
 }
 
 func Quotient(x []int) int {
-	return x[0]/x[1]
+	return x[0] / x[1]
 }
 
 func Square(x []int) int {
@@ -556,14 +573,14 @@ func SquareRoot(x []int) int {
 }
 
 func Double(x []int) int {
-	return x[0]*2
+	return x[0] * 2
 }
 
 func main() {
 	// Setup
 	var filename string
 	for _, a := range os.Args[1:] {
-		if a == "-v" || a == "-verbose"{
+		if a == "-v" || a == "-verbose" {
 			verbose = true
 		} else {
 			filename = a
@@ -577,7 +594,7 @@ func main() {
 	LoadKeywords()
 	var tokens bufio.Scanner
 	file, err := os.Open(filename)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -595,14 +612,14 @@ func main() {
 	}
 	// Add an extra token to the end.
 	words = append(words, string(byte(0)))
-	if (verbose) {
+	if verbose {
 		fmt.Printf("Tokens:\n%q\n", words)
 	}
 	program = new(Program)
 	program.Parse(words)
-	environ := map[string]int {}
+	environ := map[string]int{}
 	program.Eval(environ)
-	if (verbose) {
+	if verbose {
 		fmt.Println("Program output:")
 	}
 	fmt.Print(program.Output)
